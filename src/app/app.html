@@ -1,0 +1,54 @@
+<video autoplay muted loop id="myVideo"
+       oncanplay="this.play()" onloadedmetadata="this.muted = true">
+  <source src="/bg.mp4" type="video/mp4">
+</video>
+
+<div class="section day-time">
+  <div class="time numbers">{{ getTime() }}</div>
+  <div class="date numbers">{{ getDate() }}</div>
+  <div class="date">{{ getCurrentDayName() + ' ' + getHijriDate() }}</div>
+</div>
+
+<div class="section week">
+  @for (day of days; track $index) {
+    <div class="day" [class.current]="currentDay(day.id)" [id]="day.id">{{ day.name }}</div>
+  }
+</div>
+
+<div class="section prayers">
+  @for (prayer of prayers; track $index) {
+    <div class="prayer"
+         [class.current]="currentPrayerId() === prayer.id"
+         [class.next]="nextPrayerId() === prayer.id">
+      <div class="name">{{ prayer.name }}</div>
+      <div class="time numbers" [id]="prayer.id">{{ prayer.time }}</div>
+    </div>
+  }
+</div>
+
+<div class="section next-prayer">
+  <div class="col">
+    المتبقي لـ {{ nextPrayerName() }}
+    {{ getTimeLeft()?.text }}
+  </div>
+  <div class="col">
+    <div class="progress-bar">
+      <div class="progress-bar-fill"
+           [ngStyle]="{'width.%': 100 - getPercentTimeLeft()}">
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    من
+    {{ getTotalTimeLeft()?.text }}
+  </div>
+</div>
+
+<div class="section city">
+  <select [(ngModel)]="currentCity" (change)="onCityChange($event)">
+    <option selected disabled>اختار المدينة</option>
+    @for (city of cities; track $index) {
+      <option [value]="city.id">{{ city.name }}</option>
+    }
+  </select>
+</div>
