@@ -7,11 +7,17 @@ import {PrayerTimeResponse} from './models';
   providedIn: 'root'
 })
 export class ApiService {
-  api: HttpClient = inject(HttpClient);
+  http: HttpClient = inject(HttpClient);
 
   getPrayerTimes(city: string, date: string): Observable<PrayerTimeResponse> {
-    return this.api.get<PrayerTimeResponse>(
+    return this.http.get<PrayerTimeResponse>(
       `https://api.aladhan.com/v1/timingsByCity/${date}?city=${city}&country=MA&method=21&timezonestring=Africa%2FCasablanca`
     );
+  }
+
+  getTodayHijri(): Observable<any> {
+    const date = new Date();
+    const format = `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`;
+    return this.http.get<any>(`https://api.aladhan.com/v1/gToH/${format}?calendarMethod=UAQ`);
   }
 }

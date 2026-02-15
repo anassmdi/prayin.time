@@ -1,4 +1,4 @@
-import {Component, HostListener, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {Data, Prayer, TimeLeft, Timings} from './models';
 import {ApiService} from './api.service';
 import {FormsModule} from '@angular/forms';
@@ -40,11 +40,20 @@ export class App implements OnInit, OnDestroy {
 
   updatedPrayers: boolean = false;
 
+  hijriDate = signal<string[]>([]);
+  hijriMonth = signal<string>('');
+
   ngOnInit() {
     if (localStorage.getItem('city') != null) {
       this.currentCity = localStorage.getItem('city')!;
       this.getPrayerTimes(localStorage.getItem('city')!);
     }
+    this.api.getTodayHijri().subscribe({
+      next: value => {
+        this.hijriDate.set(value['data']['hijri']['date'].split('-'));
+        this.hijriMonth.set(value['data']['hijri']['month']['ar']);
+      }
+    });
     this.updateTime();
     this.timeInterval = setInterval(() => {
       this.updateTime();
@@ -91,12 +100,8 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
-  getHijriDate() {
-    return new Intl.DateTimeFormat('ar-TN-u-ca-islamic', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(this.time);
+  getHijriDate(): string {
+    return `${this.hijriDate()[0]} ${this.hijriMonth()} ${this.hijriDate()[2]}`;
   }
 
   /* Prayer Time */
