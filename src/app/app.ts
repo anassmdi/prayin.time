@@ -68,15 +68,6 @@ export class App implements OnInit, OnDestroy {
 
   /* DateTime */
 
-  getCurrentDayName(): string {
-    for (let day of this.days) {
-      if (this.currentDay(day.id)) {
-        return day.name!;
-      }
-    }
-    return "";
-  }
-
   currentDay(id: string): boolean {
     return id.toLowerCase() === this.time.toLocaleDateString("en-EN", {weekday: 'long'}).toLowerCase();
   }
@@ -98,6 +89,12 @@ export class App implements OnInit, OnDestroy {
     if (this.time.getHours() === 0 && this.time.getMinutes() > 1 && this.updatedPrayers) {
       this.updatedPrayers = false;
     }
+  }
+
+  getGregDate(): string {
+    return new Intl.DateTimeFormat('ar-MA', {
+      dateStyle: 'long',
+    }).format(this.time);
   }
 
   getHijriDate(): string {
