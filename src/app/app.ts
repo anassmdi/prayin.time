@@ -121,7 +121,28 @@ export class App implements OnInit {
     return this.prayers().find((p) => p.id === this.nextPrayerId())?.name || '--';
   });
 
-  currentPrayerId = signal<string>(null as any as string);
+  currentPrayerId: Signal<string> = computed(() => {
+    if (!this.prayerTimes()) return '--';
+
+    const now = this.time().getTime();
+    const currentPrayers = this.prayers();
+    const getNum = (id: string) => currentPrayers.find((p) => p.id === id)?.timeNumber || 0;
+
+    const fajr = getNum('Fajr');
+    const sunrise = getNum('Sunrise');
+    const dhuhr = getNum('Dhuhr');
+    const asr = getNum('Asr');
+    const maghrib = getNum('Maghrib');
+    const isha = getNum('Isha');
+
+    if (now < fajr) return 'Isha';
+    if (now >= fajr && now < sunrise) return 'Fajr';
+    if (now >= sunrise && now < dhuhr) return 'Sunrise';
+    if (now >= dhuhr && now < asr) return 'Dhuhr';
+    if (now >= asr && now < maghrib) return 'Asr';
+    if (now >= maghrib && now < isha) return 'Maghrib';
+    return 'Isha';
+  });
 
   private lastNotifiedPrayer = signal<string>('');
 
@@ -163,10 +184,6 @@ export class App implements OnInit {
     this.currentDayOfWeek.set(
       this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
     );
-    setTimeout(() => {
-      this.currentPrayerId.set(this.calculateActivePrayerId());
-    }, 2000);
-
     setInterval(() => {
       const freshTimeOfDay = this.calculateTimeOfDay();
       if (this.timeOfDay() !== freshTimeOfDay) {
@@ -177,37 +194,9 @@ export class App implements OnInit {
       if (this.currentDayOfWeek() !== today) {
         this.currentDayOfWeek.set(today);
       }
-
-      const activePrayer = this.calculateActivePrayerId();
-      if (this.currentPrayerId() !== activePrayer) {
-        this.currentPrayerId.set(activePrayer);
-      }
     }, 60000);
 
     this.requestNotificationPermission();
-  }
-
-  private calculateActivePrayerId(): string {
-    if (!this.prayerTimes()) return null as any as string;
-
-    const now = this.time().getTime();
-    const currentPrayers = this.prayers();
-    const getNum = (id: string) => currentPrayers.find((p) => p.id === id)?.timeNumber || 0;
-
-    const fajr = getNum('Fajr');
-    const sunrise = getNum('Sunrise');
-    const dhuhr = getNum('Dhuhr');
-    const asr = getNum('Asr');
-    const maghrib = getNum('Maghrib');
-    const isha = getNum('Isha');
-
-    if (now < fajr) return 'Isha';
-    if (now >= fajr && now < sunrise) return 'Fajr';
-    if (now >= sunrise && now < dhuhr) return 'Sunrise';
-    if (now >= dhuhr && now < asr) return 'Dhuhr';
-    if (now >= asr && now < maghrib) return 'Asr';
-    if (now >= maghrib && now < isha) return 'Maghrib';
-    return 'Isha';
   }
 
   protected onCityChange($event: Event) {
