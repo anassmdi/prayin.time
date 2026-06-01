@@ -4,19 +4,16 @@ body, html {
   margin: 0;
   padding: 0;
   background-color: #232323;
-  background-image: radial-gradient(circle, #232323, #1c1c1c, #151515, #0c0c0c, #000000);
   background-attachment: fixed;
 }
 
 body > *, select, input, button, a {
-  font-family: "Tajawal", serif !important;
+  font-family: "Rubik", serif !important;
   direction: rtl;
   color: white;
-  text-shadow: 0 0 6px rgba(239, 239, 239, 0.5);
 }
 
 .numbers {
-  font-family: "Orbitron", serif !important;
   letter-spacing: 5px;
 }
 
@@ -25,37 +22,4 @@ body > *, select, input, button, a {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-select {
-  font-size: 20px;
-  font-weight: bold;
-  text-transform: uppercase;
-  background-color: rgba(0, 0, 0, 0.2);
-  text-align: center;
-  padding: 5px;
-  box-shadow: rgba(173, 174, 195, 0.9) 0 0 3px 1px;
-
-  border-color: white;
-  min-width: 400px;
-  min-height: 30px;
-  margin: 10px auto;
-  position: relative;
-  transition: width 0.5s;
-  border-radius: 10px;
-  display: block;
-  font-family: "Tajawal", serif !important;
-
-  option {
-    font-family: "Tajawal", serif !important;
-    font-weight: bold;
-    padding: 1em;
-    cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-
-  &:hover {
-    filter: brightness(140%);
-    box-shadow: rgba(173, 174, 195, 0.9) 0 0 3px 1px;
-  }
 }

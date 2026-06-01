@@ -43,6 +43,9 @@ export class App implements OnInit, OnDestroy {
   hijriDate = signal<string[]>([]);
   hijriMonth = signal<string>('');
 
+  timeOfDay: 'morning' | 'evening' | 'night' = 'morning';
+  private timer: any;
+
   ngOnInit() {
     if (localStorage.getItem('city') != null) {
       this.currentCity = localStorage.getItem('city')!;
@@ -58,11 +61,30 @@ export class App implements OnInit, OnDestroy {
     this.timeInterval = setInterval(() => {
       this.updateTime();
     }, 1000);
+
+    this.updateTimeOfDay();
+    this.timer = setInterval(() => this.updateTimeOfDay(), 60000);
   }
 
   ngOnDestroy() {
     if (this.timeInterval) {
       clearInterval(this.timeInterval);
+    }
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  }
+
+  updateTimeOfDay() {
+    const currentHour = new Date().getHours();
+    if (currentHour >= 6 && currentHour < 17) {
+      this.timeOfDay = 'morning';
+    }
+    else if (currentHour >= 17 && currentHour < 20) {
+      this.timeOfDay = 'evening';
+    }
+    else {
+      this.timeOfDay = 'night';
     }
   }
 
