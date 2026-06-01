@@ -124,7 +124,7 @@ export class App implements OnInit {
     return this.prayers().find((p) => p.id === this.nextPrayerId())?.name || '--';
   });
 
-  currentPrayerId = signal<string>('--');
+  currentPrayerId = signal<string>(null as any as string);
 
   private lastNotifiedPrayer = signal<string>('');
 
