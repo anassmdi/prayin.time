@@ -43,9 +43,7 @@ export class App implements OnInit {
 
   timeOfDay = signal<'morning' | 'evening' | 'night'>(this.calculateTimeOfDay());
 
-  currentDayOfWeek = computed(() => {
-    return this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  });
+  currentDayOfWeek = signal<string>(null as any as string);
 
   currentDate: Signal<string> = computed(() => {
     const t = this.time();
@@ -173,10 +171,16 @@ export class App implements OnInit {
       this.time.set(new Date());
     }, 1000);
 
+    this.currentDayOfWeek.set(this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase());
     setInterval(() => {
       const freshTimeOfDay = this.calculateTimeOfDay();
       if (this.timeOfDay() !== freshTimeOfDay) {
         this.timeOfDay.set(freshTimeOfDay);
+      }
+
+      const today = this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+      if (this.currentDayOfWeek() !== today) {
+        this.currentDayOfWeek.set(today);
       }
     }, 60000);
 
