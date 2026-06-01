@@ -40,9 +40,16 @@ export class App implements OnInit {
 
   currentCity = model<string>(get(LSKeys.city)!);
 
-  timeOfDay = signal<'morning' | 'evening' | 'night'>(this.calculateTimeOfDay());
+  timeOfDay = computed<'morning' | 'evening' | 'night'>(() => {
+    const hour = this.time().getHours();
+    if (hour >= 6 && hour < 17) return 'morning';
+    if (hour >= 17 && hour < 20) return 'evening';
+    return 'night';
+  });
 
-  currentDayOfWeek = signal<string>(null as any as string);
+  currentDayOfWeek = computed(() => {
+    return this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  });
 
   currentDate: Signal<string> = computed(() => {
     const t = this.time();
@@ -80,12 +87,12 @@ export class App implements OnInit {
   percentageOfTimeLeft = computed(() => {
     const total = this.totalTimeLeft().time;
     if (!total) return 0;
-    return Math.floor((this.timeLeft().time * 100) / total);
+    return Math.floor((this.timeLeft().time * 10000) / total) / 100;
   });
 
   private calculateTimeLeft(time: number): TimeLeft {
     let next = this.getPrayerTimeNumber(this.nextPrayerId());
-    if (this.nextPrayerId() === 'Fajr') {
+    if (this.nextPrayerId() === 'Fajr' && time > next) {
       next += 24 * 60 * 60 * 1000;
     }
 
@@ -181,21 +188,6 @@ export class App implements OnInit {
       this.time.set(new Date());
     }, 1000);
 
-    this.currentDayOfWeek.set(
-      this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
-    );
-    setInterval(() => {
-      const freshTimeOfDay = this.calculateTimeOfDay();
-      if (this.timeOfDay() !== freshTimeOfDay) {
-        this.timeOfDay.set(freshTimeOfDay);
-      }
-
-      const today = this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-      if (this.currentDayOfWeek() !== today) {
-        this.currentDayOfWeek.set(today);
-      }
-    }, 60000);
-
     this.requestNotificationPermission();
   }
 
@@ -209,13 +201,6 @@ export class App implements OnInit {
     if (!document.hidden) {
       this.time.set(new Date());
     }
-  }
-
-  private calculateTimeOfDay(): 'morning' | 'evening' | 'night' {
-    const hour = new Date().getHours();
-    if (hour >= 6 && hour < 17) return 'morning';
-    if (hour >= 17 && hour < 20) return 'evening';
-    return 'night';
   }
 
   private requestNotificationPermission() {
