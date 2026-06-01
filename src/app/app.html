@@ -14,7 +14,9 @@
 
   <div class="section week">
     @for (day of days(); track $index) {
-      <div class="day" [class.current]="day['id']?.toLowerCase() === currentDayOfWeek()" [id]="day['id']">{{ day['name'] }}</div>
+      <div class="day" >
+<!--           [class.current]="day['id']?.toLowerCase() === currentDayOfWeek()">-->
+        {{ day['name'] }}</div>
     }
   </div>
 
