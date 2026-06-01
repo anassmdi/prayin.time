@@ -159,20 +159,14 @@ export class App implements OnInit {
   }
 
   ngOnInit() {
-    this.updateCurrentPrayerId();
-
     setInterval(() => {
       this.time.set(new Date());
-
-      const activePrayer = this.calculateActivePrayerId();
-      if (this.currentPrayerId() !== activePrayer) {
-        this.currentPrayerId.set(activePrayer);
-      }
     }, 1000);
 
     this.currentDayOfWeek.set(
       this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
     );
+    this.updateCurrentPrayerId(this.calculateActivePrayerId());
 
     setInterval(() => {
       const freshTimeOfDay = this.calculateTimeOfDay();
@@ -183,6 +177,11 @@ export class App implements OnInit {
       const today = this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
       if (this.currentDayOfWeek() !== today) {
         this.currentDayOfWeek.set(today);
+      }
+
+      const activePrayer = this.calculateActivePrayerId();
+      if (this.currentPrayerId() !== activePrayer) {
+        this.updateCurrentPrayerId(activePrayer);
       }
     }, 60000);
 
@@ -212,8 +211,8 @@ export class App implements OnInit {
     return 'Isha';
   }
 
-  private updateCurrentPrayerId() {
-    this.currentPrayerId.set(this.calculateActivePrayerId());
+  private updateCurrentPrayerId(id: string) {
+    this.currentPrayerId.set(id);
   }
 
   protected onCityChange($event: Event) {
