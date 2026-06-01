@@ -166,7 +166,7 @@ export class App implements OnInit {
     this.currentDayOfWeek.set(
       this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
     );
-    this.updateCurrentPrayerId(this.calculateActivePrayerId());
+    this.currentPrayerId.set(this.calculateActivePrayerId());
 
     setInterval(() => {
       const freshTimeOfDay = this.calculateTimeOfDay();
@@ -181,7 +181,7 @@ export class App implements OnInit {
 
       const activePrayer = this.calculateActivePrayerId();
       if (this.currentPrayerId() !== activePrayer) {
-        this.updateCurrentPrayerId(activePrayer);
+        this.currentPrayerId.set(activePrayer);
       }
     }, 60000);
 
@@ -209,10 +209,6 @@ export class App implements OnInit {
     if (now >= asr && now < maghrib) return 'Asr';
     if (now >= maghrib && now < isha) return 'Maghrib';
     return 'Isha';
-  }
-
-  private updateCurrentPrayerId(id: string) {
-    this.currentPrayerId.set(id);
   }
 
   protected onCityChange($event: Event) {
