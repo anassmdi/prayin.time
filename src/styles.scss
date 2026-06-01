@@ -1,23 +1,18 @@
 body, html {
   height: 100%;
   width: 100%;
-  margin: 0;
-  padding: 0;
   background-color: #232323;
-  background-attachment: fixed;
 }
 
-body > *, select, input, button, a {
+* {
+  margin: 0;
+  padding: 0;
   font-family: "Rubik", serif !important;
   direction: rtl;
   color: white;
 }
 
-.numbers {
-  letter-spacing: 5px;
-}
-
-.no {
+.no-text-selection {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;

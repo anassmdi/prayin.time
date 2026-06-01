@@ -1,59 +1,56 @@
-<div class="sky-container" [class]="timeOfDay">
+<div class="sky-container" [class]="timeOfDay()">
 
-    @if (timeOfDay === 'morning' || timeOfDay === 'evening') {
-        <div class="sun" [class.setting]="timeOfDay === 'evening'"></div>
-    } @else if (timeOfDay === 'night') {
-        <div class="moon"></div>
-        <div class="stars"></div>
+  @if (timeOfDay() === 'morning' || timeOfDay() === 'evening') {
+    <div class="sun" [class.setting]="timeOfDay() === 'evening'"></div>
+  } @else if (timeOfDay() === 'night') {
+    <div class="moon"></div>
+    <div class="stars"></div>
+  }
+
+  <div class="section day-time">
+    <div class="time numbers">{{ currentTime() }}</div>
+    <div class="date">{{ currentGregDateAr() }} - {{ currentHijriDateAr() }}</div>
+  </div>
+
+  <div class="section week">
+    @for (day of days(); track $index) {
+      <div class="day" [class.current]="isDayCurrentDay(day['id'])" [id]="day['id']">{{ day['name'] }}</div>
     }
+  </div>
 
-    <div class="section day-time">
-        <div class="time numbers">{{ getTime() }}</div>
-        <div class="date">{{ getGregDate() }} - {{ getHijriDate() }}</div>
-    </div>
+  <div class="section prayers">
+    @for (prayer of prayers(); track $index) {
+      <div class="prayer"
+           [class.current]="currentPrayerId() === prayer.id">
+        <div class="name">{{ prayer.name }}</div>
+        <div class="time numbers" [id]="prayer.id">{{ prayer.time }}</div>
+      </div>
+    }
+  </div>
 
-    <div class="section week">
-        @for (day of days; track $index) {
-            <div class="day" [class.current]="currentDay(day.id)" [id]="day.id">{{ day.name }}</div>
-        }
+  <div class="section next-prayer">
+    <div class="col">
+      {{ nextPrayerName() }}
+      بعد :
+      {{ timeLeft()?.text }}
     </div>
+    <div class="col">
+      <div class="progress-bar">
+        <div class="progress-bar-fill" [style.width.%]="100 - percentageOfTimeLeft()"></div>
+      </div>
+    </div>
+    <div class="col">
+      من
+      {{ totalTimeLeft()?.text }}
+    </div>
+  </div>
 
-    <div class="section prayers">
-        @for (prayer of prayers; track $index) {
-            <div class="prayer"
-                 [class.current]="currentPrayerId() === prayer.id"
-                 [class.next]="nextPrayerId() === prayer.id">
-                <div class="name">{{ prayer.name }}</div>
-                <div class="time numbers" [id]="prayer.id">{{ prayer.time }}</div>
-            </div>
-        }
-    </div>
-
-    <div class="section next-prayer">
-        <div class="col">
-            {{ nextPrayerName() }}
-            بعد :
-            {{ getTimeLeft()?.text }}
-        </div>
-        <div class="col">
-            <div class="progress-bar">
-                <div class="progress-bar-fill"
-                     [ngStyle]="{'width.%': 100 - getPercentTimeLeft()}">
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            من
-            {{ getTotalTimeLeft()?.text }}
-        </div>
-    </div>
-
-    <div class="section city no-container">
-        <select [(ngModel)]="currentCity" (change)="onCityChange($event)">
-            <option selected disabled>اختار المدينة</option>
-            @for (city of cities; track $index) {
-                <option [value]="city.id">{{ city.name }}</option>
-            }
-        </select>
-    </div>
+  <div class="section city no-container">
+    <select [(ngModel)]="currentCity" (change)="onCityChange($event)">
+      <option selected disabled>اختار المدينة</option>
+      @for (city of cities(); track $index) {
+        <option [value]="city['id']">{{ city['name'] }}</option>
+      }
+    </select>
+  </div>
 </div>

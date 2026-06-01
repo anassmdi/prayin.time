@@ -1,277 +1,226 @@
-import {Component, HostListener, inject, OnDestroy, OnInit, signal} from '@angular/core';
-import {Data, Prayer, TimeLeft, Timings} from './models';
-import {ApiService} from './api.service';
-import {FormsModule} from '@angular/forms';
-import {CITIES, DAYS, PRAYERS} from './data';
-import {NgStyle} from '@angular/common';
+import { Component, computed, effect, inject, model, OnInit, Signal, signal } from '@angular/core';
+import { Api } from './services/api';
+import { Data } from '@angular/router';
+import { CITIES, DAYS, PRAYERS } from './data/data';
+import { Prayer, TimeLeft, Timings } from './models/models';
+import { get, LSKeys, set } from './models/utils';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    FormsModule,
-    NgStyle
-  ],
+  imports: [FormsModule],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  host: {
+    '(document:visibilitychange)': 'onVisibilityChange()',
+  },
 })
-export class App implements OnInit, OnDestroy {
+export class App implements OnInit {
+  api: Api = inject(Api);
 
-  @HostListener('document:visibilitychange')
-  onVisibilityChange(): void {
-    if (document.hidden) {
-      // console.log('Tab is now inactive.');
-    } else {
-      // console.log('Tab is now active.');
-      this.updateTime();
-      this.getPrayerTimes(this.currentCity);
-    }
-  }
+  prayerTimes = computed<Timings>(() => this.prayerTimesApi.value()?.data?.timings!);
 
-  api: ApiService = inject(ApiService);
-  prayerTimes: Timings;
+  time = signal<Date>(new Date());
+  days = signal<Data[]>(DAYS);
+  cities = signal<Data[]>(CITIES);
 
-  days: Data[] = DAYS;
-  prayers: Prayer[] = PRAYERS;
-  cities: Data[] = CITIES;
+  prayers = computed<Prayer[]>(() => {
+    if (!this.prayerTimes()) return PRAYERS;
 
-  time: Date = new Date();
-  timeInterval: any;
-  currentCity: string = '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  updatedPrayers: boolean = false;
-
-  hijriDate = signal<string[]>([]);
-  hijriMonth = signal<string>('');
-
-  timeOfDay: 'morning' | 'evening' | 'night' = 'morning';
-  private timer: any;
-
-  ngOnInit() {
-    if (localStorage.getItem('city') != null) {
-      this.currentCity = localStorage.getItem('city')!;
-      this.getPrayerTimes(localStorage.getItem('city')!);
-    }
-    this.api.getTodayHijri().subscribe({
-      next: value => {
-        this.hijriDate.set(value['data']['hijri']['date'].split('-'));
-        this.hijriMonth.set(value['data']['hijri']['month']['ar']);
-      }
+    return PRAYERS.map((p) => {
+      const timeStr = this.prayerTimes()[p.id as keyof Timings] || '00:00';
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      const timeNumber = today.getTime() + (hours * 3600 + minutes * 60) * 1000;
+      return { ...p, time: timeStr, timeNumber };
     });
-    this.updateTime();
-    this.timeInterval = setInterval(() => {
-      this.updateTime();
-    }, 1000);
+  });
 
-    this.updateTimeOfDay();
-    this.timer = setInterval(() => this.updateTimeOfDay(), 60000);
-  }
+  currentCity = model<string>(get(LSKeys.city) || (null as any as string));
 
-  ngOnDestroy() {
-    if (this.timeInterval) {
-      clearInterval(this.timeInterval);
-    }
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
-  }
+  timeOfDay = computed<'morning' | 'evening' | 'night'>(() => {
+    const hour = this.time().getHours();
+    if (hour >= 6 && hour < 17) return 'morning';
+    if (hour >= 17 && hour < 20) return 'evening';
+    return 'night';
+  });
 
-  updateTimeOfDay() {
-    const currentHour = new Date().getHours();
-    if (currentHour >= 6 && currentHour < 17) {
-      this.timeOfDay = 'morning';
-    }
-    else if (currentHour >= 17 && currentHour < 20) {
-      this.timeOfDay = 'evening';
-    }
-    else {
-      this.timeOfDay = 'night';
-    }
-  }
+  currentDate: Signal<string> = computed(() => {
+    const t = this.time();
+    return `${t.getDate()}-${t.getMonth() + 1}-${t.getFullYear()}`;
+  });
 
-  /* DateTime */
+  currentTime: Signal<string> = computed(() => {
+    return `${this.time().getHours().toString().padStart(2, '0')}:${this.time().getMinutes().toString().padStart(2, '0')}:${this.time().getSeconds().toString().padStart(2, '0')}`;
+  });
 
-  currentDay(id: string): boolean {
-    return id.toLowerCase() === this.time.toLocaleDateString("en-EN", {weekday: 'long'}).toLowerCase();
-  }
-
-  getTime(): string {
-    return `${this.time.getHours().toString().padStart(2, '0')}:${this.time.getMinutes().toString().padStart(2, '0')}:${this.time.getSeconds().toString().padStart(2, '0')}`;
-  }
-
-  getDate(): string {
-    return `${this.time.getDate()}-${this.time.getMonth() + 1}-${this.time.getFullYear()}`;
-  }
-
-  private updateTime() {
-    this.time = new Date();
-    if (this.time.getHours() === 0 && this.time.getMinutes() <= 1 && !this.updatedPrayers) {
-      this.getPrayerTimes(this.currentCity);
-      this.updatedPrayers = true;
-    }
-    if (this.time.getHours() === 0 && this.time.getMinutes() > 1 && this.updatedPrayers) {
-      this.updatedPrayers = false;
-    }
-  }
-
-  getGregDate(): string {
+  currentGregDateAr: Signal<string> = computed(() => {
     return new Intl.DateTimeFormat('ar-MA', {
       dateStyle: 'long',
-    }).format(this.time);
-  }
+    }).format(this.time());
+  });
 
-  getHijriDate(): string {
-    return `${this.hijriDate()[0]} ${this.hijriMonth()} ${this.hijriDate()[2]}`;
-  }
+  currentHijriDateAr: Signal<string> = computed(() => {
+    const hijri = this.hijriDateApi.value()?.data?.hijri;
+    if (!hijri) return '--';
+    const parts = hijri.date.split('-');
+    return `${parts[0]} ${hijri.month.ar} ${parts[2]}`;
+  });
 
-  /* Prayer Time */
+  timeLeft = computed<TimeLeft>(() => {
+    if (!this.prayerTimes()) return { time: 0, text: '--:--' };
+    return this.calculateTimeLeft(this.time().getTime());
+  });
 
-  onCityChange($event: Event) {
-    const event = $event.target as HTMLInputElement;
-    this.currentCity = event.value;
-    localStorage.setItem('city', event.value);
-    this.getPrayerTimes(this.currentCity);
-  }
+  totalTimeLeft = computed<TimeLeft>(() => {
+    if (!this.prayerTimes()) return { time: 0, text: '--:--' };
+    const currentPrayerTime = this.getPrayerTimeNumber(this.currentPrayerId());
+    return this.calculateTimeLeft(currentPrayerTime);
+  });
 
-  getPrayerTimes(city: string) {
-    if (city && city?.trim() !== '') {
-      this.api.getPrayerTimes(city, this.getDate())
-        ?.subscribe({
-          next: (response) => {
-            this.prayerTimes = response?.data?.timings;
-            this.updatePrayerTime();
-          }
-        });
+  percentageOfTimeLeft = computed(() => {
+    const total = this.totalTimeLeft().time;
+    if (!total) return 0;
+    return Math.floor((this.timeLeft().time * 10000) / total) / 100;
+  });
+
+  private calculateTimeLeft(time: number): TimeLeft {
+    let next = this.getPrayerTimeNumber(this.nextPrayerId());
+    if (this.nextPrayerId() === 'Fajr') {
+      next += 24 * 60 * 60 * 1000;
     }
-  }
 
-  private updatePrayerTime() {
-    this.prayers.forEach((prayer) => {
-      switch (prayer.id) {
-        case 'Fajr':
-          prayer.time = this.prayerTimes?.Fajr;
-          break;
-        case 'Sunrise':
-          prayer.time = this.prayerTimes?.Sunrise;
-          break;
-        case 'Dhuhr':
-          prayer.time = this.prayerTimes?.Dhuhr;
-          break;
-        case 'Asr':
-          prayer.time = this.prayerTimes?.Asr;
-          break;
-        case 'Maghrib':
-          prayer.time = this.prayerTimes?.Maghrib;
-          break;
-        case 'Isha':
-          prayer.time = this.prayerTimes?.Isha;
-          break;
-      }
-      const timeNumber = prayer.time.split(':');
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      prayer.timeNumber = new Date(today.getTime() + (((+timeNumber[0]) * 60 * 60 + (+timeNumber[1]) * 60) * 1000)).getTime();
-    })
-  }
+    const diff = next - time;
 
-  getTimeLeft(): TimeLeft {
-    if (this.prayerTimes) {
-      let next;
-      if (this.prayers.find(prayer => prayer.id === this.nextPrayerId())?.id === 'Fajr') {
-        next = this.prayers.find(prayer => prayer.id === 'Fajr')?.timeNumber! + 24 * 60 * 60 * 1000;
-      } else {
-        next = this.prayers.find(prayer => prayer.id === this.nextPrayerId())?.timeNumber!;
-      }
-      const now = this.time.getTime();
-      const diff = next - now;
-      const left = new Date(diff);
-      return {
-        time: diff,
-        text: `${left.getHours().toString().padStart(2, '0')}:${left.getMinutes().toString().padStart(2, '0')}`
-      };
-    }
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+
     return {
-      time: 0,
-      text: "--:--"
+      time: diff,
+      text: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
     };
   }
 
-  getPercentTimeLeft(): number {
-    return this.getTimeLeft()?.time * 100 / this.getTotalTimeLeft()?.time;
+  private getPrayerTimeNumber(id: string): number {
+    return this.prayers().find((p) => p.id === id)?.timeNumber || 0;
   }
 
-  getTotalTimeLeft(): TimeLeft {
-    if (this.prayerTimes) {
-      let next;
-      if (this.prayers.find(prayer => prayer.id === this.nextPrayerId())?.id === 'Fajr') {
-        next = this.prayers.find(prayer => prayer.id === 'Fajr')?.timeNumber! + 24 * 60 * 60 * 1000;
-      } else {
-        next = this.prayers.find(prayer => prayer.id === this.nextPrayerId())?.timeNumber!;
-      }
-      let current = this.prayers.find(prayer => prayer.id === this.currentPrayerId())?.timeNumber!;
-      const diff = next - current;
-      const left = new Date(diff);
-      return {
-        time: diff,
-        text: `${left.getHours().toString().padStart(2, '0')}:${left.getMinutes().toString().padStart(2, '0')}`
-      };
-    }
-    return {
-      time: 0,
-      text: "--:--"
+  nextPrayerId: Signal<string> = computed(() => {
+    if (!this.prayerTimes()) return '--';
+    const chain: Record<string, string> = {
+      Fajr: 'Sunrise',
+      Sunrise: 'Dhuhr',
+      Dhuhr: 'Asr',
+      Asr: 'Maghrib',
+      Maghrib: 'Isha',
+      Isha: 'Fajr',
     };
-  }
+    return chain[this.currentPrayerId()] || '--';
+  });
 
-  nextPrayerId(): string {
-    if (this.prayerTimes) {
-      switch (this.currentPrayerId()) {
-        case 'Fajr':
-          return 'Sunrise';
-        case 'Sunrise':
-          return 'Dhuhr';
-        case 'Dhuhr':
-          return 'Asr';
-        case 'Asr':
-          return 'Maghrib';
-        case 'Maghrib':
-          return 'Isha';
-        case 'Isha':
-          return 'Fajr';
+  nextPrayerName: Signal<string> = computed(() => {
+    return this.prayers().find((p) => p.id === this.nextPrayerId())?.name || '--';
+  });
+
+  currentPrayerId: Signal<string> = computed(() => {
+    if (this.prayerTimes()) {
+      const now = this.time().getTime();
+      const fajr = this.getPrayer('Fajr')?.timeNumber!;
+      const sunrise = this.getPrayer('Sunrise')?.timeNumber!;
+      const dhuhr = this.getPrayer('Dhuhr')?.timeNumber!;
+      const asr = this.getPrayer('Asr')?.timeNumber!;
+      const maghrib = this.getPrayer('Maghrib')?.timeNumber!;
+      const isha = this.getPrayer('Isha')?.timeNumber!;
+      if (now < fajr) return 'Isha';
+      else if (now >= fajr && now < sunrise) return 'Fajr';
+      else if (now >= sunrise && now < dhuhr) return 'Sunrise';
+      else if (now >= dhuhr && now < asr) return 'Dhuhr';
+      else if (now >= asr && now < maghrib) return 'Asr';
+      else if (now >= maghrib && now < isha) return 'Maghrib';
+      else return 'Isha';
+    }
+    return '--';
+  });
+
+  private lastNotifiedPrayer = signal<string>('');
+
+  constructor() {
+    effect(() => {
+      const remainingMs = this.timeLeft().time;
+      const nextPrayer = this.nextPrayerId();
+
+      const fiveMinutesInMs = 310000;
+
+      if (
+        remainingMs <= fiveMinutesInMs &&
+        remainingMs > 0 &&
+        nextPrayer !== '--' &&
+        this.lastNotifiedPrayer() !== nextPrayer
+      ) {
+        this.lastNotifiedPrayer.update((old) => nextPrayer);
+        this.sendNotification(this.nextPrayerName());
       }
-    }
-    return '--';
+    });
   }
 
-  nextPrayerName(): string {
-    if (this.prayerTimes) {
-      return this.prayers.find(value => value?.id === this.nextPrayerId())?.name!;
-    }
-    return '--';
+  ngOnInit() {
+    setInterval(() => {
+      this.time.set(new Date());
+    }, 1000);
+
+    this.requestNotificationPermission();
   }
 
-  currentPrayerId(): string {
-    if (this.prayerTimes) {
-      const now = this.time.getTime();
-      const fajr = this.prayers.find(prayer => prayer.id === 'Fajr')?.timeNumber!;
-      const sunrise = this.prayers.find(prayer => prayer.id === 'Sunrise')?.timeNumber!;
-      const dhuhr = this.prayers.find(prayer => prayer.id === 'Dhuhr')?.timeNumber!;
-      const asr = this.prayers.find(prayer => prayer.id === 'Asr')?.timeNumber!;
-      const maghrib = this.prayers.find(prayer => prayer.id === 'Maghrib')?.timeNumber!;
-      const isha = this.prayers.find(prayer => prayer.id === 'Isha')?.timeNumber!;
-      if (now < fajr)
-        return 'Isha';
-      else if (now >= fajr && now < sunrise)
-        return 'Fajr';
-      else if (now >= sunrise && now < dhuhr)
-        return 'Sunrise';
-      else if (now >= dhuhr && now < asr)
-        return 'Dhuhr';
-      else if (now >= asr && now < maghrib)
-        return 'Asr';
-      else if (now >= maghrib && now < isha)
-        return 'Maghrib';
-      else
-        return 'Isha';
+  prayerTimesApi = rxResource({
+    params: () =>
+      this.currentCity() ? { city: this.currentCity(), date: this.currentDate() } : undefined,
+    stream: ({ params }) => this.api.getPrayerTimes(params.city!, params.date),
+  });
+
+  hijriDateApi = rxResource({
+    params: () => ({ date: this.currentDate() }),
+    stream: ({ params }) => this.api.getTodayHijri(params?.date),
+  });
+
+  isDayCurrentDay(id: string): boolean {
+    return (
+      id.toLowerCase() ===
+      this.time().toLocaleDateString('en-EN', { weekday: 'long' }).toLowerCase()
+    );
+  }
+
+  protected onCityChange($event: Event) {
+    const value = ($event.target as HTMLInputElement).value;
+    this.currentCity.set(value);
+    set(LSKeys.city, value);
+  }
+
+  onVisibilityChange(): void {
+    if (!document.hidden) {
+      this.time.set(new Date());
     }
-    return '--';
+  }
+
+  getPrayer(id: string): Prayer {
+    return this.prayers().find((item) => item?.id === id)!;
+  }
+
+  private requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }
+
+  private sendNotification(prayerName: string) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      return;
+    }
+    new Notification('تذكير بالصلاة', {
+      body: `بقي 5 دقائق لصلاة : ${prayerName}`,
+      requireInteraction: true,
+    });
   }
 }
