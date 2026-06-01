@@ -14,8 +14,7 @@
 
   <div class="section week">
     @for (day of days(); track day.key) {
-      <div class="day">
-<!--        [class.current]="day?.key === currentDayOfWeek()">-->
+      <div class="day" [class.current]="day?.key === currentDayOfWeek()">
         {{ day?.value }}
       </div>
     }
@@ -23,8 +22,7 @@
 
   <div class="section prayers">
     @for (prayer of prayers(); track prayer.id) {
-      <div class="prayer"
-        [class.current]="currentPrayerId() === prayer.id">
+      <div class="prayer" [class.current]="currentPrayerId() === prayer.id">
         <div class="name">{{ prayer.name }}</div>
         <div class="time numbers">{{ prayer.time }}</div>
       </div>
