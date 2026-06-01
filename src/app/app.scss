@@ -152,7 +152,7 @@
         align-content: center;
         align-self: center;
 
-        &[current="true"] {
+        &.current {
           font-weight: bold;
           border-radius: 10px;
           padding: 10px 20px;
