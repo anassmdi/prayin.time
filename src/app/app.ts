@@ -48,6 +48,10 @@ export class App implements OnInit {
     return 'night';
   });
 
+  currentDayOfWeek = computed(() => {
+    return this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  });
+
   currentDate: Signal<string> = computed(() => {
     const t = this.time();
     return `${t.getDate()}-${t.getMonth() + 1}-${t.getFullYear()}`;
@@ -126,23 +130,26 @@ export class App implements OnInit {
   });
 
   currentPrayerId: Signal<string> = computed(() => {
-    if (this.prayerTimes()) {
-      const now = this.time().getTime();
-      const fajr = this.getPrayer('Fajr')?.timeNumber!;
-      const sunrise = this.getPrayer('Sunrise')?.timeNumber!;
-      const dhuhr = this.getPrayer('Dhuhr')?.timeNumber!;
-      const asr = this.getPrayer('Asr')?.timeNumber!;
-      const maghrib = this.getPrayer('Maghrib')?.timeNumber!;
-      const isha = this.getPrayer('Isha')?.timeNumber!;
-      if (now < fajr) return 'Isha';
-      else if (now >= fajr && now < sunrise) return 'Fajr';
-      else if (now >= sunrise && now < dhuhr) return 'Sunrise';
-      else if (now >= dhuhr && now < asr) return 'Dhuhr';
-      else if (now >= asr && now < maghrib) return 'Asr';
-      else if (now >= maghrib && now < isha) return 'Maghrib';
-      else return 'Isha';
-    }
-    return '--';
+    if (!this.prayerTimes()) return '--';
+
+    const now = this.time().getTime();
+    const currentPrayers = this.prayers();
+    const getNum = (id: string) => currentPrayers.find((p) => p.id === id)?.timeNumber || 0;
+
+    const fajr = getNum('Fajr');
+    const sunrise = getNum('Sunrise');
+    const dhuhr = getNum('Dhuhr');
+    const asr = getNum('Asr');
+    const maghrib = getNum('Maghrib');
+    const isha = getNum('Isha');
+
+    if (now < fajr) return 'Isha';
+    if (now >= fajr && now < sunrise) return 'Fajr';
+    if (now >= sunrise && now < dhuhr) return 'Sunrise';
+    if (now >= dhuhr && now < asr) return 'Dhuhr';
+    if (now >= asr && now < maghrib) return 'Asr';
+    if (now >= maghrib && now < isha) return 'Maghrib';
+    return 'Isha';
   });
 
   private lastNotifiedPrayer = signal<string>('');
@@ -184,13 +191,6 @@ export class App implements OnInit {
     params: () => ({ date: this.currentDate() }),
     stream: ({ params }) => this.api.getTodayHijri(params?.date),
   });
-
-  isDayCurrentDay(id: string): boolean {
-    return (
-      id.toLowerCase() ===
-      this.time().toLocaleDateString('en-EN', { weekday: 'long' }).toLowerCase()
-    );
-  }
 
   protected onCityChange($event: Event) {
     const value = ($event.target as HTMLInputElement).value;
