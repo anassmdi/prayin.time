@@ -1,8 +1,7 @@
 import { Component, computed, effect, inject, model, OnInit, Signal, signal } from '@angular/core';
 import { Api } from './services/api';
-import { Data } from '@angular/router';
 import { CITIES, DAYS, PRAYERS } from './data/data';
-import { Prayer, TimeLeft, Timings } from './models/models';
+import { KeyValue, Prayer, TimeLeft, Timings } from './models/models';
 import { get, LSKeys, set } from './models/utils';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -22,8 +21,8 @@ export class App implements OnInit {
   prayerTimes = computed<Timings>(() => this.prayerTimesApi.value()?.data?.timings!);
 
   time = signal<Date>(new Date());
-  days = signal<Data[]>(DAYS);
-  cities = signal<Data[]>(CITIES);
+  days = signal<KeyValue[]>(DAYS);
+  cities = signal<KeyValue[]>(CITIES);
 
   prayers = computed<Prayer[]>(() => {
     const timings = this.prayerTimes();
@@ -174,7 +173,9 @@ export class App implements OnInit {
       this.time.set(new Date());
     }, 1000);
 
-    this.currentDayOfWeek.set(this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase());
+    this.currentDayOfWeek.set(
+      this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
+    );
     setInterval(() => {
       const freshTimeOfDay = this.calculateTimeOfDay();
       if (this.timeOfDay() !== freshTimeOfDay) {

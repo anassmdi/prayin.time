@@ -1,6 +1,6 @@
-export class Data {
-  id: string;
-  name: string;
+export class KeyValue {
+  key: string;
+  value: string;
 }
 
 export class Prayer {

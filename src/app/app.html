@@ -13,17 +13,16 @@
   </div>
 
   <div class="section week">
-    @for (day of days(); track $index) {
-      <div class="day" >
-        <!--           [class.current]="day['id']?.toLowerCase() === currentDayOfWeek()">-->
-        {{ day['name'] }}</div>
+    @for (day of days(); track day.key) {
+      <div class="day" [class.current]="day?.key?.toLowerCase() === currentDayOfWeek()">
+        {{ day?.value }}
+      </div>
     }
   </div>
 
   <div class="section prayers">
-    @for (prayer of prayers(); track $index) {
-      <div class="prayer"
-                   [class.current]="currentPrayerId() === prayer.id">
+    @for (prayer of prayers(); track prayer.id) {
+      <div class="prayer" [class.current]="currentPrayerId() === prayer.id">
         <div class="name">{{ prayer.name }}</div>
         <div class="time numbers">{{ prayer.time }}</div>
       </div>
@@ -50,8 +49,8 @@
   <div class="section city no-container">
     <select [(ngModel)]="currentCity" (change)="onCityChange($event)">
       <option selected disabled>اختار المدينة</option>
-      @for (city of cities(); track $index) {
-        <option [value]="city['id']">{{ city['name'] }}</option>
+      @for (city of cities(); track city.key) {
+        <option [value]="city?.key">{{ city?.value }}</option>
       }
     </select>
   </div>
