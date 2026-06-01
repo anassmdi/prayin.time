@@ -18,15 +18,15 @@
     }
   </div>
 
-  <div class="section prayers">
-    @for (prayer of prayers(); track $index) {
-      <div class="prayer"
-           [class.current]="currentPrayerId() === prayer.id">
-        <div class="name">{{ prayer.name }}</div>
-        <div class="time numbers" [id]="prayer.id">{{ prayer.time }}</div>
-      </div>
-    }
-  </div>
+<!--  <div class="section prayers">-->
+<!--    @for (prayer of prayers(); track $index) {-->
+<!--      <div class="prayer"-->
+<!--           [class.current]="currentPrayerId() === prayer.id">-->
+<!--        <div class="name">{{ prayer.name }}</div>-->
+<!--        <div class="time numbers" [id]="prayer.id">{{ prayer.time }}</div>-->
+<!--      </div>-->
+<!--    }-->
+<!--  </div>-->
 
 <!--  <div class="section next-prayer">-->
 <!--    <div class="col">-->
