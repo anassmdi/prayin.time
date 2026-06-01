@@ -15,17 +15,17 @@
   <div class="section week">
     @for (day of days(); track $index) {
       <div class="day" >
-<!--           [class.current]="day['id']?.toLowerCase() === currentDayOfWeek()">-->
+        <!--           [class.current]="day['id']?.toLowerCase() === currentDayOfWeek()">-->
         {{ day['name'] }}</div>
     }
   </div>
 
   <div class="section prayers">
     @for (prayer of prayers(); track $index) {
-      <div class="prayer">
-<!--           [class.current]="currentPrayerId() === prayer.id">-->
+      <div class="prayer"
+                   [class.current]="currentPrayerId() === prayer.id">
         <div class="name">{{ prayer.name }}</div>
-        <div class="time numbers" [id]="prayer.id">{{ prayer.time }}</div>
+        <div class="time numbers">{{ prayer.time }}</div>
       </div>
     }
   </div>
