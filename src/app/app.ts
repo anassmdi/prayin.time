@@ -25,18 +25,15 @@ export class App implements OnInit {
   cities = signal<KeyValue[]>(CITIES);
 
   prayers = computed<Prayer[]>(() => {
-    const timings = this.prayerTimes();
-    if (!timings) return PRAYERS;
+    if (!this.prayerTimes()) return PRAYERS;
 
-    const staticToday = new Date();
-    staticToday.setHours(0, 0, 0, 0);
-    const midnightTimestamp = staticToday.getTime();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     return PRAYERS.map((p) => {
-      const timeStr = timings[p.id as keyof Timings] || '00:00';
+      const timeStr = this.prayerTimes()[p.id as keyof Timings] || '00:00';
       const [hours, minutes] = timeStr.split(':').map(Number);
-      const timeNumber = midnightTimestamp + (hours * 3600 + minutes * 60) * 1000;
-
+      const timeNumber = today.getTime() + (hours * 3600 + minutes * 60) * 1000;
       return { ...p, time: timeStr, timeNumber };
     });
   });
