@@ -41,12 +41,7 @@ export class App implements OnInit {
 
   currentCity = model<string>(get(LSKeys.city) || (null as any as string));
 
-  timeOfDay = computed<'morning' | 'evening' | 'night'>(() => {
-    const hour = this.time().getHours();
-    if (hour >= 6 && hour < 17) return 'morning';
-    if (hour >= 17 && hour < 20) return 'evening';
-    return 'night';
-  });
+  timeOfDay = signal<'morning' | 'evening' | 'night'>(this.calculateTimeOfDay());
 
   currentDayOfWeek = computed(() => {
     return this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
@@ -178,6 +173,13 @@ export class App implements OnInit {
       this.time.set(new Date());
     }, 1000);
 
+    setInterval(() => {
+      const freshTimeOfDay = this.calculateTimeOfDay();
+      if (this.timeOfDay() !== freshTimeOfDay) {
+        this.timeOfDay.set(freshTimeOfDay);
+      }
+    }, 60000);
+
     this.requestNotificationPermission();
   }
 
@@ -204,8 +206,11 @@ export class App implements OnInit {
     }
   }
 
-  getPrayer(id: string): Prayer {
-    return this.prayers().find((item) => item?.id === id)!;
+  private calculateTimeOfDay(): 'morning' | 'evening' | 'night' {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 17) return 'morning';
+    if (hour >= 17 && hour < 20) return 'evening';
+    return 'night';
   }
 
   private requestNotificationPermission() {
