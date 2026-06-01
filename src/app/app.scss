@@ -130,8 +130,6 @@
           border-radius: 10px;
 
           background: rgba(255, 255, 255, 0.12);
-          backdrop-filter: blur(10px) brightness(1.2);
-          -webkit-backdrop-filter: blur(10px) brightness(1.2);
           border: 1px solid rgba(255, 255, 255, 0.25);
         }
       }
@@ -158,8 +156,6 @@
           padding: 10px 20px;
 
           background: rgba(255, 255, 255, 0.12);
-          backdrop-filter: blur(10px) brightness(1.2);
-          -webkit-backdrop-filter: blur(10px) brightness(1.2);
           border: 1px solid rgba(255, 255, 255, 0.25);
 
           .time {
