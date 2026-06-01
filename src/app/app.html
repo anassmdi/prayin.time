@@ -23,7 +23,7 @@
 
   <div class="section prayers">
     @for (prayer of prayers(); track prayer.id) {
-      <div class="prayer" [class.current]="true">
+      <div class="prayer" [attr.current]="currentPrayerId() === prayer.id ? 'true' : null">
 <!--        [class.current]="currentPrayerId() === prayer.id">-->
         <div class="name">{{ prayer.name }}</div>
         <div class="time numbers">{{ prayer.time }}</div>
