@@ -166,7 +166,9 @@ export class App implements OnInit {
     this.currentDayOfWeek.set(
       this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
     );
-    this.currentPrayerId.set(this.calculateActivePrayerId());
+    setTimeout(() => {
+      this.currentPrayerId.set(this.calculateActivePrayerId());
+    }, 2000);
 
     setInterval(() => {
       const freshTimeOfDay = this.calculateTimeOfDay();
@@ -189,7 +191,7 @@ export class App implements OnInit {
   }
 
   private calculateActivePrayerId(): string {
-    if (!this.prayerTimes()) return '--';
+    if (!this.prayerTimes()) return null as any as string;
 
     const now = this.time().getTime();
     const currentPrayers = this.prayers();
