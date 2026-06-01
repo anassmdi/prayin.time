@@ -39,7 +39,7 @@ export class App implements OnInit {
     });
   });
 
-  currentCity = model<string>(get(LSKeys.city) || (null as any as string));
+  currentCity = model<string>(get(LSKeys.city)!);
 
   timeOfDay = signal<'morning' | 'evening' | 'night'>(this.calculateTimeOfDay());
 
