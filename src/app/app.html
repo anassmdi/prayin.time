@@ -47,11 +47,11 @@
   </div>
 
   <div class="section city no-container">
-<!--    <select [(ngModel)]="currentCity" (change)="onCityChange($event)">-->
-<!--      <option selected disabled>اختار المدينة</option>-->
-<!--      @for (city of cities(); track city.key) {-->
-<!--        <option [value]="city?.key">{{ city?.value }}</option>-->
-<!--      }-->
-<!--    </select>-->
+    <select [(ngModel)]="currentCity" (change)="onCityChange($event)">
+      <option selected disabled>اختار المدينة</option>
+      @for (city of cities(); track city.key) {
+        <option [value]="city?.key">{{ city?.value }}</option>
+      }
+    </select>
   </div>
 </div>
