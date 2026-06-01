@@ -14,38 +14,38 @@
 
   <div class="section week">
     @for (day of days(); track $index) {
-      <div class="day" >
-<!--           [class.current]="day['id']?.toLowerCase() === currentDayOfWeek()">-->
-        {{ day['name'] }}</div>
+      <div class="day" [class.current]="day['id']?.toLowerCase() === currentDayOfWeek()">
+        {{ day['name'] }}
+      </div>
     }
   </div>
 
   <div class="section prayers">
     @for (prayer of prayers(); track $index) {
       <div class="prayer">
-<!--           [class.current]="currentPrayerId() === prayer.id">-->
+        <!--           [class.current]="currentPrayerId() === prayer.id">-->
         <div class="name">{{ prayer.name }}</div>
         <div class="time numbers" [id]="prayer.id">{{ prayer.time }}</div>
       </div>
     }
   </div>
 
-<!--  <div class="section next-prayer">-->
-<!--    <div class="col">-->
-<!--      {{ nextPrayerName() }}-->
-<!--      بعد :-->
-<!--      {{ timeLeft()?.text }}-->
-<!--    </div>-->
-<!--    <div class="col">-->
-<!--      <div class="progress-bar">-->
-<!--        <div class="progress-bar-fill" [style.width.%]="100 - percentageOfTimeLeft()"></div>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--    <div class="col">-->
-<!--      من-->
-<!--      {{ totalTimeLeft()?.text }}-->
-<!--    </div>-->
-<!--  </div>-->
+  <!--  <div class="section next-prayer">-->
+  <!--    <div class="col">-->
+  <!--      {{ nextPrayerName() }}-->
+  <!--      بعد :-->
+  <!--      {{ timeLeft()?.text }}-->
+  <!--    </div>-->
+  <!--    <div class="col">-->
+  <!--      <div class="progress-bar">-->
+  <!--        <div class="progress-bar-fill" [style.width.%]="100 - percentageOfTimeLeft()"></div>-->
+  <!--      </div>-->
+  <!--    </div>-->
+  <!--    <div class="col">-->
+  <!--      من-->
+  <!--      {{ totalTimeLeft()?.text }}-->
+  <!--    </div>-->
+  <!--  </div>-->
 
   <div class="section city no-container">
     <select [(ngModel)]="currentCity" (change)="onCityChange($event)">
