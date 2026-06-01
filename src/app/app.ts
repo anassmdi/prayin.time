@@ -83,7 +83,7 @@ export class App implements OnInit {
   percentageOfTimeLeft = computed(() => {
     const total = this.totalTimeLeft().time;
     if (!total) return 0;
-    return Math.floor((this.timeLeft().time * 10000) / total) / 100;
+    return Math.floor((this.timeLeft().time * 100) / total);
   });
 
   private calculateTimeLeft(time: number): TimeLeft {
