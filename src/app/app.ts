@@ -121,7 +121,7 @@ export class App implements OnInit {
     return this.prayers().find((p) => p.id === this.nextPrayerId())?.name || '--';
   });
 
-  currentPrayerId: Signal<string> = computed(() => {
+  currentPrayerId(): string {
     if (!this.prayerTimes()) return '--';
 
     const now = this.time().getTime();
@@ -142,7 +142,7 @@ export class App implements OnInit {
     if (now >= asr && now < maghrib) return 'Asr';
     if (now >= maghrib && now < isha) return 'Maghrib';
     return 'Isha';
-  });
+  }
 
   private lastNotifiedPrayer = signal<string>('');
 
