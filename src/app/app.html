@@ -1,11 +1,11 @@
-<div class="sky-container" [class]="timeOfDay()">
+<div class="sky-container"
+     [class.morning]="timeOfDay() === 'morning'"
+     [class.evening]="timeOfDay() === 'evening'"
+     [class.night]="timeOfDay() === 'night'">
 
-  @if (timeOfDay() === 'morning' || timeOfDay() === 'evening') {
-    <div class="sun" [class.setting]="timeOfDay() === 'evening'"></div>
-  } @else if (timeOfDay() === 'night') {
-    <div class="moon"></div>
-    <div class="stars"></div>
-  }
+  <div class="sun" [hidden]="timeOfDay() === 'night'" [class.setting]="timeOfDay() === 'evening'"></div>
+  <div class="moon" [hidden]="timeOfDay() !== 'night'"></div>
+  <div class="stars" [hidden]="timeOfDay() !== 'night'"></div>
 
   <div class="section day-time">
     <div class="time numbers">{{ currentTime() }}</div>
