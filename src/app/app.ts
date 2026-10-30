@@ -41,11 +41,24 @@ export class App implements OnInit {
   currentCity = model<string>(get(LSKeys.city)!);
 
   timeOfDay = computed<'morning' | 'evening' | 'night'>(() => {
-    const hour = this.time().getHours();
-    if (hour >= 6 && hour < 17) return 'morning';
-    if (hour >= 17 && hour < 20) return 'evening';
+    if (!this.prayerTimes()) return 'morning';
+    const now = this.time().getTime();
+    const currentPrayers = this.prayers();
+    
+    const getNum = (id: string) => currentPrayers.find((p) => p.id === id)?.timeNumber || 0;
+    const fajr = getNum('Fajr');
+    const dhuhr = getNum('Dhuhr');
+    const maghrib = getNum('Maghrib');
+    if (now >= fajr && now < dhuhr) {
+      return 'morning';
+    }
+    if (now >= dhuhr && now < maghrib) {
+      return 'evening';
+    }
     return 'night';
   });
+
+  
 
   currentDayOfWeek = computed(() => {
     return this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
