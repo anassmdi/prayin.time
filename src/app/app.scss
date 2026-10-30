@@ -155,7 +155,7 @@
           border-radius: 10px;
           padding: 10px 20px;
 
-          background: rgb(0 169 255 / 0.12);
+          background: rgb(255 0 0 / 0.12);
           border: 1px solid rgba(255, 255, 255, 0.25);
 
           .time {
@@ -163,18 +163,18 @@
           }
 
           .time, .name {
-            color: cyan !important;
+            color: #db7070 !important;
           }
         }
 
         &.next {
-          background: rgb(255 0 0 / 0.12);
+          background: rgb(0 169 255 / 0.12);
           border: 1px solid rgba(255, 255, 255, 0.25);
           border-radius: 10px;
           padding: 7px 15px;
 
           .time, .name {
-            color: #db7070 !important;
+            color: cyan !important;
           }
         }
 
