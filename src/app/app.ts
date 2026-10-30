@@ -43,12 +43,11 @@ export class App implements OnInit {
   timeOfDay = computed<'morning' | 'evening' | 'night'>(() => {
     if (!this.prayerTimes()) return 'morning';
     const now = this.time().getTime();
-    const currentPrayers = this.prayers();
-    
-    const getNum = (id: string) => currentPrayers.find((p) => p.id === id)?.timeNumber || 0;
-    const fajr = getNum('Fajr');
-    const dhuhr = getNum('Dhuhr');
-    const maghrib = getNum('Maghrib');
+    const getPrayerTimeNumber = (id: string) =>
+      this.prayers().find((p) => p.id === id)?.timeNumber || 0;
+    const fajr = getPrayerTimeNumber('Fajr');
+    const dhuhr = getPrayerTimeNumber('Dhuhr');
+    const maghrib = getPrayerTimeNumber('Maghrib');
     if (now >= fajr && now < dhuhr) {
       return 'morning';
     }
@@ -57,8 +56,6 @@ export class App implements OnInit {
     }
     return 'night';
   });
-
-  
 
   currentDayOfWeek = computed(() => {
     return this.time().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();

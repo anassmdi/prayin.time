@@ -2,11 +2,12 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
-    "prayin.time": {
+    "prayintime": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -61,10 +62,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "prayin.time:build:production"
+              "buildTarget": "prayintime:build:production"
             },
             "development": {
-              "buildTarget": "prayin.time:build:development"
+              "buildTarget": "prayintime:build:development"
             }
           },
           "defaultConfiguration": "development"
