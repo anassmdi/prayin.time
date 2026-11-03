@@ -46,12 +46,12 @@ export class App implements OnInit {
     const getPrayerTimeNumber = (id: string) =>
       this.prayers().find((p) => p.id === id)?.timeNumber || 0;
     const fajr = getPrayerTimeNumber('Fajr');
-    const dhuhr = getPrayerTimeNumber('Dhuhr');
+    const asr = getPrayerTimeNumber('Asr');
     const maghrib = getPrayerTimeNumber('Maghrib');
-    if (now >= fajr && now < dhuhr) {
+    if (now >= fajr && now < asr) {
       return 'morning';
     }
-    if (now >= dhuhr && now < maghrib) {
+    if (now >= asr && now < maghrib) {
       return 'evening';
     }
     return 'night';
